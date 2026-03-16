@@ -1,0 +1,318 @@
+================================================================
+         CONCEPTOS DEL PARADIGMA ORIENTADO A OBJETOS
+         Proyecto: Sistema de Monitoreo Astronautas - Contexto 4
+================================================================
+
+----------------------------------------------------------------
+1. MÉTODO CONSTRUCTOR
+----------------------------------------------------------------
+Definición:
+  Método especial que se ejecuta automáticamente al crear un objeto.
+  Tiene el mismo nombre de la clase y no retorna ningún valor.
+  Se usa para inicializar los atributos del objeto.
+
+Ubicación en el código:
+  - Clase: Astronauta.java
+    Línea: public Astronauta(String id, String nombre, double peso, ...)
+    → Constructor con parámetros que inicializa todos los atributos.
+
+  - Clase: Sensor.java
+    Línea: public Sensor() {}
+    → Constructor vacío (sin parámetros).
+
+  - Clase: Registro.java
+    Línea: public Registro(int numero_registro, int fecha, Astronauta astronauta, String datos)
+    → Constructor que recibe objetos de otras clases como parámetros.
+
+----------------------------------------------------------------
+2. MÉTODOS DE ACCESO (Getters y Setters)
+----------------------------------------------------------------
+Definición:
+  Métodos públicos que permiten leer (getter) o modificar (setter)
+  los atributos privados de una clase, respetando el encapsulamiento.
+
+Ubicación en el código:
+  - Clase: Radiacion.java
+    Línea: public double getCantidad_sievert() { return cantidad_sievert; }
+    → Getter: retorna el valor del atributo privado cantidad_sievert.
+
+  - Clase: Radiacion.java
+    Línea: public void setCantidad_sievert(double cantidad_sievert) { ... }
+    → Setter: permite modificar el atributo privado desde fuera de la clase.
+
+  - Clase: Traje.java
+    Línea: public static String getColor() { return color; }
+    → Getter estático para el atributo estático color.
+
+  - Clase: Traje.java
+    Línea: public static void setColor(String nuevoColor) { color = nuevoColor; }
+    → Setter estático para modificar el atributo estático color.
+
+----------------------------------------------------------------
+3. MÉTODO TO_STRING
+----------------------------------------------------------------
+Definición:
+  Método heredado de la clase Object que se sobreescribe para retornar
+  una representación en texto del objeto. Se llama automáticamente
+  al imprimir un objeto con System.out.println().
+
+Ubicación en el código:
+  - Clase: Registro.java
+    Línea: public String toString() { return "Registro{numero_registro=" + ... }
+    → Retorna los datos del registro en formato legible.
+
+  - Clase: Astronauta.java
+    Línea: public String toString() { return "Astronauta{id='" + id + "', nombre='" + ... }
+    → Representa al astronauta con sus atributos principales.
+
+  - Clase: Mitigacion.java
+    Línea: public String toString() { return "Mitigacion{codigo='" + codigo + "', ... }
+    → Retorna la información de la mitigación como cadena de texto.
+
+----------------------------------------------------------------
+4. MODIFICADOR STATIC
+----------------------------------------------------------------
+Definición:
+  Indica que el atributo o método pertenece a la CLASE y no a una
+  instancia específica. Todos los objetos de esa clase comparten
+  el mismo valor del atributo estático.
+
+Ubicación en el código:
+  - Clase: Traje.java
+    Línea: public static String color;
+    → Atributo estático: todos los objetos Traje comparten este valor.
+
+  - Clase: Traje.java
+    Línea: public static String getColor() / public static void setColor(...)
+    → Métodos estáticos para acceder y modificar el atributo estático.
+
+  - Clase: Principal.java
+    Línea: Traje.setColor("Naranja NASA");
+    → Evidencia que al cambiar el valor estático, todos los objetos
+      Traje reflejan el mismo nuevo valor sin necesidad de instancia.
+
+----------------------------------------------------------------
+5. MODIFICADOR FINAL
+----------------------------------------------------------------
+Definición:
+  Puede aplicarse a clases, métodos y atributos:
+  - Clase final: no puede ser heredada.
+  - Método final: no puede ser sobreescrito en subclases.
+  - Atributo final: su valor no puede cambiar después de ser asignado (constante).
+
+Ubicación en el código:
+  - Clase: DatosConstantes.java
+    Línea: public final class DatosConstantes { ... }
+    → Clase final: ninguna otra clase puede extenderla con "extends".
+
+  - Clase: DatosConstantes.java
+    Línea: public static final double LIMITE_MAXIMO_RADIACION = 1.0;
+    → Atributo final: constante que nunca puede cambiar su valor.
+
+  - Clase: DatosConstantes.java
+    Línea: public static final String NOMBRE_SISTEMA = "Sistema de Monitoreo Espacial v1.0";
+    → Atributo final de tipo String, valor fijo en toda la ejecución.
+
+  - Clase: Protocolo.java
+    Línea: public final String obtener_descripcion_protocolo() { ... }
+    → Método final: ninguna subclase (ProtocoloInsuficiencia, ProtocoloRadiacion)
+      puede sobreescribir este método.
+
+----------------------------------------------------------------
+6. VISIBILIDADES
+----------------------------------------------------------------
+Definición:
+  Controlan el acceso a clases, atributos y métodos:
+  - private (-): solo accesible dentro de la misma clase.
+  - public (+): accesible desde cualquier clase.
+  - protected (#): accesible en la misma clase y sus subclases.
+
+Ubicación en el código:
+  - Clase: Astronauta.java
+    Línea: private String id;
+    → Atributo privado: solo accesible dentro de Astronauta.java.
+
+  - Clase: Sensor.java
+    Línea: public int medir_ritmo_cardiaco(int latidos) { ... }
+    → Método público: accesible desde cualquier clase del proyecto.
+
+  - Clase: Protocolo.java
+    Línea: public String modificar_protocolo() / public String modificar_protocolo(String vigencia)
+    → Métodos públicos heredables por las subclases.
+
+  - Clase: DatosConstantes.java
+    Línea: public static final double LIMITE_MAXIMO_RADIACION = 1.0;
+    → Constante pública y estática: accesible directamente como DatosConstantes.LIMITE_MAXIMO_RADIACION.
+
+----------------------------------------------------------------
+7. MULTIPLICIDADES
+----------------------------------------------------------------
+Definición:
+  Indica cuántos objetos de una clase se relacionan con objetos
+  de otra clase. Ejemplos: 1 (exactamente uno), 0..1 (cero o uno),
+  1..* (uno o más), * (muchos).
+
+Ubicación en el código:
+  - Clase: Astronauta.java
+    Línea: private Traje traje;
+    → Multiplicidad 1: un Astronauta tiene exactamente un Traje.
+
+  - Clase: Nave.java
+    Línea: private Astronauta[] astronauta;
+    → Multiplicidad *: una Nave puede contener múltiples Astronautas (arreglo).
+
+  - Clase: Protocolo.java
+    Línea: private Sensor sensor;
+    → Multiplicidad 1: un Protocolo referencia exactamente un Sensor.
+
+  - Clase: Registro.java
+    Línea: private Astronauta astronauta;
+    → Multiplicidad 1: un Registro pertenece a un único Astronauta.
+
+----------------------------------------------------------------
+8. SOBREESCRITURA DE MÉTODOS
+----------------------------------------------------------------
+Definición:
+  Una subclase redefine un método heredado de la superclase con
+  la misma firma (mismo nombre y parámetros). Se indica con @Override.
+  En tiempo de ejecución se llama la versión del objeto real (polimorfismo).
+
+Ubicación en el código:
+  - Clase: ProtocoloInsuficiencia.java
+    Línea: @Override
+           public String controlar_limites(double cantidad_radiacion) { ... }
+    → Sobreescribe el método controlar_limites de Protocolo.java para
+      manejar niveles de radiación insuficientes.
+
+  - Clase: ProtocoloRadiacion.java
+    Línea: @Override
+           public String controlar_limites(double cantidad_radiacion) { ... }
+    → Sobreescribe el mismo método de Protocolo.java para
+      manejar niveles de radiación elevados.
+
+  - Clase: Principal.java
+    Línea: protocolos[i].controlar_limites(rad1.getCantidad_sievert())
+    → Desde el arreglo de tipo Protocolo se evidencia que cada objeto
+      ejecuta SU versión sobreescrita del método.
+
+----------------------------------------------------------------
+9. SOBRECARGA DE MÉTODOS
+----------------------------------------------------------------
+Definición:
+  Una misma clase define dos o más métodos con el mismo nombre pero
+  diferente cantidad o tipo de parámetros. Se resuelve en tiempo de compilación.
+
+Ubicación en el código:
+  - Clase: Sensor.java
+    Línea: public int medir_ritmo_cardiaco(int latidos) { ... }
+    → Primera versión: recibe solo los latidos.
+
+  - Clase: Sensor.java
+    Línea: public int medir_ritmo_cardiaco(int latidos, String modo) { ... }
+    → Segunda versión (SOBRECARGA): recibe latidos y modo de medición.
+
+  - Clase: Protocolo.java
+    Línea: public String modificar_protocolo() { ... }
+    Línea: public String modificar_protocolo(String vigencia) { ... }
+    → Sobrecarga del método modificar_protocolo con y sin parámetro.
+
+----------------------------------------------------------------
+10. CREACIÓN DE OBJETOS
+----------------------------------------------------------------
+Definición:
+  Proceso de instanciar una clase usando la palabra reservada "new",
+  lo que reserva memoria y ejecuta el constructor de la clase.
+
+Ubicación en el código:
+  - Clase: Principal.java
+    Línea: Sensor sensor1 = new Sensor("SEN-001", "Titanio", "Blanco", 5.5, 0.3);
+    → Creación de un objeto Sensor con sus atributos inicializados.
+
+  - Clase: Principal.java
+    Línea: Mitigacion mit1 = new Mitigacion("MIT-001", "Blindaje reforzado", 1, "Modulo A", rad1);
+    → Creación de un objeto Mitigacion que recibe otro objeto (Radiacion) como parámetro.
+
+  - Clase: Principal.java
+    Línea: DatosConstantes datos = new DatosConstantes();
+    → Creación de objeto de la clase final DatosConstantes.
+
+----------------------------------------------------------------
+11. AGREGACIONES
+----------------------------------------------------------------
+Definición:
+  Relación entre clases donde un objeto "contiene" o "usa" a otro,
+  pero ambos pueden existir de forma independiente. Se representa
+  con un rombo vacío en el diagrama UML.
+
+Ubicación en el código:
+  - Clase: Traje.java
+    Línea: private Sensor sensor;
+    → Agregación: un Traje contiene un Sensor, pero el Sensor
+      puede existir sin el Traje.
+
+  - Clase: Protocolo.java
+    Línea: private Sensor sensor;
+    Línea: private Radiacion radiacion;
+    Línea: private Mitigacion mitigacion;
+    → Agregación: Protocolo referencia objetos de otras clases
+      que existen independientemente.
+
+  - Clase: Nave.java
+    Línea: private Astronauta[] astronauta;
+    → Agregación: la Nave agrupa Astronautas, pero cada Astronauta
+      existe independientemente de la Nave.
+
+----------------------------------------------------------------
+12. HERENCIA
+----------------------------------------------------------------
+Definición:
+  Mecanismo por el cual una subclase adquiere los atributos y métodos
+  de su superclase usando la palabra reservada "extends".
+  Permite reutilizar código y establecer jerarquías de clases.
+
+Ubicación en el código:
+  - Clase: ProtocoloInsuficiencia.java
+    Línea: public class ProtocoloInsuficiencia extends Protocolo { ... }
+    → Hereda todos los atributos y métodos de Protocolo.java.
+
+  - Clase: ProtocoloRadiacion.java
+    Línea: public class ProtocoloRadiacion extends Protocolo { ... }
+    → Hereda de Protocolo y sobreescribe controlar_limites().
+
+  - Clase: ProtocoloInsuficiencia.java / ProtocoloRadiacion.java
+    Línea: super(registro, instrucciones, limites, mitigacion, sensor, radiacion);
+    → Llamada al constructor de la superclase Protocolo desde la subclase.
+
+----------------------------------------------------------------
+13. POLIMORFISMO
+----------------------------------------------------------------
+Definición:
+  Capacidad de un objeto de comportarse de diferentes formas según
+  su tipo real en tiempo de ejecución. Se logra mediante sobreescritura
+  de métodos y el uso de referencias de tipo superclase que apuntan
+  a objetos de subclases.
+
+Ubicación en el código:
+  - Clase: Principal.java
+    Línea: Protocolo[] protocolos = new Protocolo[5];
+    → Arreglo de tipo supersuperclase que almacena objetos de subclases distintas.
+
+  - Clase: Principal.java
+    Línea: protocolos[i].controlar_limites(rad1.getCantidad_sievert())
+    → Polimorfismo en acción: según el tipo real del objeto en cada posición
+      del arreglo, se ejecuta la versión correspondiente del método.
+
+  - Clase: Principal.java
+    Línea: public static void metodo_polimorfismo_param(Protocolo protocolo, double radiacion)
+    → Método que recibe un parámetro de tipo supersuperclase (Protocolo)
+      y funciona con cualquier subclase gracias al polimorfismo.
+
+  - Clase: Principal.java
+    Línea: public static Protocolo metodo_polimorfismo_retorno(String tipo, ...)
+    → Método que retorna tipo Protocolo (supersuperclase) pero en realidad
+      devuelve un objeto ProtocoloInsuficiencia o ProtocoloRadiacion
+      según el parámetro recibido.
+
+================================================================
+                        FIN DEL DOCUMENTO
+================================================================
