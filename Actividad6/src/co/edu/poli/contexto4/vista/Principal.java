@@ -130,9 +130,6 @@ public class Principal {
         System.out.println("  Desde ProtocoloInsuficiencia : " + protocolos[0].obtener_descripcion_protocolo());
         System.out.println("  Desde ProtocoloRadiacion     : " + protocolos[1].obtener_descripcion_protocolo());
         System.out.println("  (Ambas subclases ejecutan la misma versión final — no sobreescrita)");
- 
-        System.out.println("\n=============================================================");
-        System.out.println("         FIN DE LA EJECUCIÓN - TODOS LOS PUNTOS OK          ");
-        System.out.println("=============================================================");
+
     }
 }
