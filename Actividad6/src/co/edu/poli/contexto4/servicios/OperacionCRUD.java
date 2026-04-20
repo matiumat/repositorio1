@@ -6,60 +6,64 @@ import co.edu.poli.contexto4.model.Protocolo;
  * Interfaz que define las operaciones CRUD (Crear, Leer, Modificar, Eliminar)
  * sobre un arreglo de objetos de tipo {@link Protocolo} (supersuperclase).
  * <p>
- * La clase {@link ImplementacionOperacionCRUD} implementa esta interfaz
- * y proporciona la lógica concreta de cada operación, incluyendo validaciones
- * y crecimiento dinámico del arreglo.
+ * Todos los métodos declaran {@code throws ProtocoloException}, lo que obliga
+ * a los métodos que los invocan a manejar los errores con {@code try-catch}.
+ * Los errores ya no se retornan como Strings sino que se propagan como excepciones.
  * </p>
  *
- * @author Mateo Paredes
- * @since 06/04/2026
+ * @author Equipo Contexto 4
+ * @version 2.0
  * @see ImplementacionOperacionCRUD
+ * @see ProtocoloException
  */
 public interface OperacionCRUD {
 
     /**
      * Crea e inserta un nuevo protocolo en el arreglo.
-     * La inserción se realiza en el primer espacio {@code null} encontrado
-     * de izquierda a derecha. Si el arreglo está lleno, su tamaño se duplica
-     * antes de insertar, permitiendo un crecimiento infinito.
+     * Inserta en el primer espacio {@code null} de izquierda a derecha.
+     * Si el arreglo está lleno, su tamaño se duplica antes de insertar.
      *
-     * @param protocolo Objeto {@link Protocolo} a insertar. No puede ser null.
-     * @return Mensaje indicando el resultado de la operación (OK o ERROR).
+     * @param protocolo Objeto {@link Protocolo} a insertar.
+     * @return Mensaje OK con la posición de inserción.
+     * @throws ProtocoloException Si el protocolo es null, el numero_id es inválido,
+     *                            o ya existe un protocolo con el mismo numero_id.
      */
-    String crear(Protocolo protocolo);
+    String crear(Protocolo protocolo) throws ProtocoloException;
 
     /**
-     * Lee y retorna el protocolo ubicado en la posición indicada del arreglo.
+     * Lee y retorna el protocolo ubicado en la posición indicada.
      *
-     * @param indice Posición del arreglo a consultar (debe estar dentro del rango).
-     * @return El objeto {@link Protocolo} en esa posición, o {@code null} si no existe
-     *         o el índice es inválido.
+     * @param indice Posición del arreglo a consultar.
+     * @return El objeto {@link Protocolo} en esa posición.
+     * @throws ProtocoloException Si el índice está fuera de rango o la posición está vacía.
      */
-    Protocolo leer(int indice);
+    Protocolo leer(int indice) throws ProtocoloException;
 
     /**
      * Retorna el arreglo completo de protocolos, incluyendo posiciones {@code null}.
      *
      * @return Arreglo de tipo {@link Protocolo} con todos los elementos actuales.
+     * @throws ProtocoloException Si el arreglo está completamente vacío.
      */
-    Protocolo[] leerTodos();
+    Protocolo[] leerTodos() throws ProtocoloException;
 
     /**
-     * Modifica el protocolo ubicado en la posición indicada, reemplazándolo
-     * con el nuevo objeto proporcionado.
+     * Modifica el protocolo en la posición indicada reemplazándolo con el nuevo objeto.
      *
-     * @param indice   Posición del arreglo a modificar.
+     * @param indice    Posición del arreglo a modificar.
      * @param protocolo Nuevo objeto {@link Protocolo} con el que se reemplaza.
-     * @return Mensaje indicando el resultado de la operación (OK o ERROR).
+     * @return Mensaje OK confirmando el reemplazo.
+     * @throws ProtocoloException Si el índice es inválido, la posición está vacía,
+     *                            o el protocolo de reemplazo es null o tiene numero_id inválido.
      */
-    String modificar(int indice, Protocolo protocolo);
+    String modificar(int indice, Protocolo protocolo) throws ProtocoloException;
 
     /**
-     * Elimina el protocolo ubicado en la posición indicada,
-     * dejando esa posición como {@code null} para reutilización futura.
+     * Elimina el protocolo en la posición indicada dejándola como {@code null}.
      *
      * @param indice Posición del arreglo a eliminar.
-     * @return Mensaje indicando el resultado de la operación (OK o ERROR).
+     * @return Mensaje OK confirmando la eliminación.
+     * @throws ProtocoloException Si el índice está fuera de rango o la posición ya está vacía.
      */
-    String eliminar(int indice);
+    String eliminar(int indice) throws ProtocoloException;
 }

@@ -14,28 +14,23 @@ import java.io.IOException;
  * Implementación concreta de las interfaces {@link OperacionCRUD} y {@link OperacionArchivo}.
  * <p>
  * Gestiona un arreglo dinámico de objetos de tipo {@link Protocolo} (supersuperclase).
- * El arreglo inicia con tamaño 2 y se duplica automáticamente cuando se llena,
- * permitiendo almacenamiento infinito de protocolos.
+ * El arreglo inicia con tamaño 2 y se duplica automáticamente cuando se llena.
  * </p>
  * <p>
- * Adicionalmente, implementa serialización y deserialización de los datos
- * en un archivo de texto plano {@code protocolos.txt}, con validaciones
- * completas en cada operación.
+ * Todos los métodos usan {@code throws} para propagar los errores al método
+ * invocador en lugar de retornar Strings de error. Los errores de validación
+ * lanzan {@link ProtocoloException} y los errores de archivo lanzan {@link IOException}.
  * </p>
  *
-* @author Mateo Paredes
- * @since 06/04/2026
+ * @author Equipo Contexto 4
+ * @version 2.0
  * @see OperacionCRUD
  * @see OperacionArchivo
- * @see Protocolo
+ * @see ProtocoloException
  */
 public class ImplementacionOperacionCRUD implements OperacionCRUD, OperacionArchivo {
 
-    public void setArreglo_protocolos(Protocolo[] arreglo_protocolos) {
-		this.arreglo_protocolos = arreglo_protocolos;
-	}
-
-	/** Nombre del archivo donde se persisten los protocolos. */
+    /** Nombre del archivo donde se persisten los protocolos. */
     private static final String NOMBRE_ARCHIVO = "protocolos.txt";
 
     /** Separador de campos dentro de cada línea del archivo. */
@@ -43,8 +38,7 @@ public class ImplementacionOperacionCRUD implements OperacionCRUD, OperacionArch
 
     /**
      * Arreglo de tipo supersuperclase {@link Protocolo}.
-     * Inicia con tamaño 2 según el diagrama UML.
-     * Se duplica automáticamente al llenarse.
+     * Inicia con tamaño 2. Se duplica automáticamente al llenarse.
      */
     private Protocolo[] arreglo_protocolos;
 
@@ -61,32 +55,22 @@ public class ImplementacionOperacionCRUD implements OperacionCRUD, OperacionArch
 
     /**
      * {@inheritDoc}
-     * <p>
-     * Inserta en el primer espacio {@code null} de izquierda a derecha.
-     * Si el arreglo está lleno, su tamaño se duplica antes de insertar.
-     * </p>
-     * <p><strong>Validaciones:</strong></p>
-     * <ul>
-     *   <li>El protocolo no puede ser {@code null}.</li>
-     *   <li>El atributo {@code codigo} no puede ser nulo ni vacío.</li>
-     *   <li>No se permiten códigos duplicados en el arreglo.</li>
-     * </ul>
      *
-     * @param protocolo Protocolo a insertar.
-     * @return Mensaje OK con la posición de inserción, o mensaje ERROR con la causa.
+     * @throws ProtocoloException Si el protocolo es {@code null}, el numero_id está vacío,
+     *                            o ya existe un protocolo con ese numero_id.
      */
     @Override
-    public String crear(Protocolo protocolo) {
+    public String crear(Protocolo protocolo) throws ProtocoloException {
         if (protocolo == null) {
-            return "ERROR [CREAR]: No se puede insertar un protocolo null.";
+            throw new ProtocoloException("No se puede insertar un protocolo null.");
         }
         if (protocolo.getCodigo() == null || protocolo.getCodigo().trim().isEmpty()) {
-            return "ERROR [CREAR]: El protocolo debe tener un codigo valido.";
+            throw new ProtocoloException("El protocolo debe tener un numero_id valido.");
         }
         for (Protocolo p : arreglo_protocolos) {
             if (p != null && p.getCodigo().equals(protocolo.getCodigo())) {
-                return "ERROR [CREAR]: Ya existe un protocolo con codigo '"
-                        + protocolo.getCodigo() + "'.";
+                throw new ProtocoloException("Ya existe un protocolo con numero_id '"
+                        + protocolo.getCodigo() + "'.");
             }
         }
 
@@ -94,7 +78,7 @@ public class ImplementacionOperacionCRUD implements OperacionCRUD, OperacionArch
         for (int i = 0; i < arreglo_protocolos.length; i++) {
             if (arreglo_protocolos[i] == null) {
                 arreglo_protocolos[i] = protocolo;
-                return "OK [CREAR]: Protocolo '" + protocolo.getCodigo()
+                return "OK [CREAR]: Protocolo con numero_id '" + protocolo.getCodigo()
                         + "' insertado en posicion [" + i + "].";
             }
         }
@@ -109,124 +93,91 @@ public class ImplementacionOperacionCRUD implements OperacionCRUD, OperacionArch
         for (int i = 0; i < arreglo_protocolos.length; i++) {
             if (arreglo_protocolos[i] == null) {
                 arreglo_protocolos[i] = protocolo;
-                return "OK [CREAR]: Arreglo lleno, se duplico a tamano "
-                        + arreglo_protocolos.length
-                        + ". Protocolo '" + protocolo.getCodigo()
+                return "OK [CREAR]: Arreglo duplicado a tamano " + arreglo_protocolos.length
+                        + ". Protocolo con numero_id '" + protocolo.getCodigo()
                         + "' insertado en posicion [" + i + "].";
             }
         }
-        return "ERROR [CREAR]: No se pudo insertar el protocolo.";
+
+        throw new ProtocoloException("No se pudo insertar el protocolo. Error inesperado.");
     }
 
     /**
      * {@inheritDoc}
-     * <p><strong>Validaciones:</strong></p>
-     * <ul>
-     *   <li>El índice debe estar dentro del rango del arreglo.</li>
-     *   <li>La posición no debe estar vacía ({@code null}).</li>
-     * </ul>
      *
-     * @param indice Posición a consultar.
-     * @return El {@link Protocolo} encontrado, o {@code null} si hay error.
+     * @throws ProtocoloException Si el índice está fuera de rango o la posición está vacía.
      */
     @Override
-    public Protocolo leer(int indice) {
+    public Protocolo leer(int indice) throws ProtocoloException {
         if (indice < 0 || indice >= arreglo_protocolos.length) {
-            System.out.println("ERROR [LEER]: Indice " + indice
+            throw new ProtocoloException("Indice " + indice
                     + " fuera de rango. Tamano actual: " + arreglo_protocolos.length);
-            return null;
         }
         if (arreglo_protocolos[indice] == null) {
-            System.out.println("ERROR [LEER]: No hay protocolo en la posicion [" + indice + "].");
-            return null;
+            throw new ProtocoloException("No hay protocolo en la posicion [" + indice + "].");
         }
         return arreglo_protocolos[indice];
     }
 
     /**
      * {@inheritDoc}
-     * <p>
-     * Si el arreglo está completamente vacío, imprime un mensaje informativo.
-     * </p>
      *
-     * @return Arreglo completo de {@link Protocolo}, incluyendo posiciones {@code null}.
+     * @throws ProtocoloException Si el arreglo está completamente vacío.
      */
     @Override
-    public Protocolo[] leerTodos() {
-        boolean hayDatos = false;
+    public Protocolo[] leerTodos() throws ProtocoloException {
         for (Protocolo p : arreglo_protocolos) {
-            if (p != null) { hayDatos = true; break; }
+            if (p != null) return arreglo_protocolos;
         }
-        if (!hayDatos) {
-            System.out.println("INFO [LEER TODOS]: El arreglo esta vacio.");
-        }
-        return arreglo_protocolos;
+        throw new ProtocoloException("El arreglo esta vacio. No hay protocolos registrados.");
     }
 
     /**
      * {@inheritDoc}
-     * <p><strong>Validaciones:</strong></p>
-     * <ul>
-     *   <li>El índice debe estar dentro del rango del arreglo.</li>
-     *   <li>La posición debe contener un objeto (no puede ser {@code null}).</li>
-     *   <li>El protocolo de reemplazo no puede ser {@code null}.</li>
-     *   <li>El código del protocolo de reemplazo no puede ser nulo ni vacío.</li>
-     * </ul>
      *
-     * @param indice    Posición del arreglo a modificar.
-     * @param protocolo Nuevo protocolo con el que se reemplaza.
-     * @return Mensaje OK confirmando el reemplazo, o mensaje ERROR con la causa.
+     * @throws ProtocoloException Si el índice es inválido, la posición está vacía,
+     *                            el protocolo de reemplazo es null, o el numero_id está vacío.
      */
     @Override
-    public String modificar(int indice, Protocolo protocolo) {
+    public String modificar(int indice, Protocolo protocolo) throws ProtocoloException {
         if (indice < 0 || indice >= arreglo_protocolos.length) {
-            return "ERROR [MODIFICAR]: Indice " + indice
-                    + " fuera de rango. Tamano actual: " + arreglo_protocolos.length;
+            throw new ProtocoloException("Indice " + indice
+                    + " fuera de rango. Tamano actual: " + arreglo_protocolos.length);
         }
         if (arreglo_protocolos[indice] == null) {
-            return "ERROR [MODIFICAR]: No existe protocolo en la posicion ["
-                    + indice + "]. Use CREAR para insertar.";
+            throw new ProtocoloException("No existe protocolo en la posicion ["
+                    + indice + "]. Use CREAR para insertar.");
         }
         if (protocolo == null) {
-            return "ERROR [MODIFICAR]: El protocolo de reemplazo no puede ser null.";
+            throw new ProtocoloException("El protocolo de reemplazo no puede ser null.");
         }
         if (protocolo.getCodigo() == null || protocolo.getCodigo().trim().isEmpty()) {
-            return "ERROR [MODIFICAR]: El protocolo de reemplazo debe tener un codigo valido.";
+            throw new ProtocoloException("El protocolo de reemplazo debe tener un numero_id valido.");
         }
-        String codigoAnterior = arreglo_protocolos[indice].getCodigo();
+        String idAnterior = arreglo_protocolos[indice].getCodigo();
         arreglo_protocolos[indice] = protocolo;
-        return "OK [MODIFICAR]: Posicion [" + indice + "] actualizada. '"
-                + codigoAnterior + "' -> '" + protocolo.getCodigo() + "'.";
+        return "OK [MODIFICAR]: Posicion [" + indice + "] actualizada. numero_id '"
+                + idAnterior + "' -> '" + protocolo.getCodigo() + "'.";
     }
 
     /**
      * {@inheritDoc}
-     * <p>
-     * La posición eliminada queda como {@code null} y puede ser reutilizada
-     * por una operación {@link #crear(Protocolo)} posterior.
-     * </p>
-     * <p><strong>Validaciones:</strong></p>
-     * <ul>
-     *   <li>El índice debe estar dentro del rango del arreglo.</li>
-     *   <li>La posición no debe estar ya vacía ({@code null}).</li>
-     * </ul>
      *
-     * @param indice Posición del arreglo a eliminar.
-     * @return Mensaje OK confirmando la eliminación, o mensaje ERROR con la causa.
+     * @throws ProtocoloException Si el índice está fuera de rango o la posición ya está vacía.
      */
     @Override
-    public String eliminar(int indice) {
+    public String eliminar(int indice) throws ProtocoloException {
         if (indice < 0 || indice >= arreglo_protocolos.length) {
-            return "ERROR [ELIMINAR]: Indice " + indice
-                    + " fuera de rango. Tamano actual: " + arreglo_protocolos.length;
+            throw new ProtocoloException("Indice " + indice
+                    + " fuera de rango. Tamano actual: " + arreglo_protocolos.length);
         }
         if (arreglo_protocolos[indice] == null) {
-            return "ERROR [ELIMINAR]: No existe protocolo en la posicion ["
-                    + indice + "]. Ya esta vacia.";
+            throw new ProtocoloException("No existe protocolo en la posicion ["
+                    + indice + "]. Ya esta vacia.");
         }
-        String codigoEliminado = arreglo_protocolos[indice].getCodigo();
+        String idEliminado = arreglo_protocolos[indice].getCodigo();
         arreglo_protocolos[indice] = null;
-        return "OK [ELIMINAR]: Protocolo '" + codigoEliminado
+        return "OK [ELIMINAR]: Protocolo con numero_id '" + idEliminado
                 + "' eliminado de la posicion [" + indice + "].";
     }
 
@@ -236,128 +187,97 @@ public class ImplementacionOperacionCRUD implements OperacionCRUD, OperacionArch
 
     /**
      * {@inheritDoc}
-     * <p>
-     * Escribe cada protocolo no-null en una línea del archivo {@code protocolos.txt}
-     * con el siguiente formato:
-     * </p>
-     * <pre>
-     *   TIPO;codigo;registro;instrucciones;limites
-     * </pre>
-     * <p>
-     * Donde {@code TIPO} es {@code INS} para {@link ProtocoloInsuficiencia}
-     * o {@code RAD} para {@link ProtocoloRadiacion}.
-     * </p>
-     * <p><strong>Validaciones:</strong></p>
-     * <ul>
-     *   <li>El arreglo no puede estar completamente vacío.</li>
-     *   <li>Si ocurre un error de I/O, retorna un mensaje ERROR detallado.</li>
-     * </ul>
      *
-     * @return Mensaje OK con la cantidad de protocolos guardados, o ERROR con la causa.
+     * @throws ProtocoloException Si el arreglo está completamente vacío.
+     * @throws IOException        Si ocurre un error al escribir el archivo.
      */
     @Override
-    public String serializar() {
+    public String serializar() throws IOException, ProtocoloException {
         boolean hayDatos = false;
         for (Protocolo p : arreglo_protocolos) {
             if (p != null) { hayDatos = true; break; }
         }
         if (!hayDatos) {
-            return "ERROR [SERIALIZAR]: El arreglo esta vacio. No hay datos para guardar.";
+            throw new ProtocoloException("El arreglo esta vacio. No hay datos para serializar.");
         }
 
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(NOMBRE_ARCHIVO))) {
-            int escritos = 0;
-            for (Protocolo p : arreglo_protocolos) {
-                if (p != null) {
-                    String tipo         = (p instanceof ProtocoloInsuficiencia) ? "INS" : "RAD";
-                    String codigo       = p.getCodigo()        != null ? p.getCodigo()        : "";
-                    String registro     = p.getRegistro()      != null ? p.getRegistro()      : "";
-                    String instrucciones= p.getInstrucciones() != null ? p.getInstrucciones() : "";
-                    String limites      = p.getLimites()       != null ? p.getLimites()       : "";
+        // IOException se propaga directamente al invocador (sin try-catch interno)
+        BufferedWriter bw = new BufferedWriter(new FileWriter(NOMBRE_ARCHIVO));
+        int escritos = 0;
+        for (Protocolo p : arreglo_protocolos) {
+            if (p != null) {
+                String tipo         = (p instanceof ProtocoloInsuficiencia) ? "INS" : "RAD";
+                String numeroId     = p.getCodigo()        != null ? p.getCodigo()        : "";
+                String registro     = p.getRegistro()      != null ? p.getRegistro()      : "";
+                String instrucciones= p.getInstrucciones() != null ? p.getInstrucciones() : "";
+                String limites      = p.getLimites()       != null ? p.getLimites()       : "";
 
-                    bw.write(tipo + SEP + codigo + SEP + registro + SEP + instrucciones + SEP + limites);
-                    bw.newLine();
-                    escritos++;
-                }
+                bw.write(tipo + SEP + numeroId + SEP + registro + SEP + instrucciones + SEP + limites);
+                bw.newLine();
+                escritos++;
             }
-            return "OK [SERIALIZAR]: " + escritos + " protocolo(s) guardados en '"
-                    + NOMBRE_ARCHIVO + "'.";
-        } catch (IOException e) {
-            return "ERROR [SERIALIZAR]: No se pudo escribir el archivo. " + e.getMessage();
         }
+        bw.close();
+        return "OK [SERIALIZAR]: " + escritos + " protocolo(s) guardados en '"
+                + NOMBRE_ARCHIVO + "'.";
     }
 
     /**
      * {@inheritDoc}
-     * <p>
-     * Lee el archivo {@code protocolos.txt} línea por línea y reconstruye
-     * los objetos {@link Protocolo} según el tipo indicado en cada línea
-     * ({@code INS} → {@link ProtocoloInsuficiencia}, {@code RAD} → {@link ProtocoloRadiacion}).
-     * </p>
-     * <p><strong>Validaciones:</strong></p>
-     * <ul>
-     *   <li>Si el archivo no existe o no puede leerse, retorna arreglo vacío.</li>
-     *   <li>Si el archivo está vacío, informa y retorna arreglo vacío.</li>
-     *   <li>Las líneas con formato incorrecto (menos de 5 campos) son omitidas con aviso.</li>
-     *   <li>Los tipos desconocidos son omitidos con aviso.</li>
-     * </ul>
      *
-     * @return Arreglo de {@link Protocolo} reconstruido, o arreglo vacío si hay error.
+     * @throws IOException Si el archivo no existe o no puede leerse.
      */
     @Override
-    public Protocolo[] deserializar() {
+    public Protocolo[] deserializar() throws IOException {
+        // Primera pasada: contar líneas (IOException se propaga al invocador)
         int totalLineas = 0;
-        try (BufferedReader br = new BufferedReader(new FileReader(NOMBRE_ARCHIVO))) {
-            while (br.readLine() != null) totalLineas++;
-        } catch (IOException e) {
-            System.out.println("ERROR [DESERIALIZAR]: No se pudo leer el archivo '"
-                    + NOMBRE_ARCHIVO + "'. " + e.getMessage());
-            return new Protocolo[0];
-        }
-
-        if (totalLineas == 0) {
-            System.out.println("ERROR [DESERIALIZAR]: El archivo '"
-                    + NOMBRE_ARCHIVO + "' esta vacio.");
-            return new Protocolo[0];
-        }
+        BufferedReader br1 = new BufferedReader(new FileReader(NOMBRE_ARCHIVO));
+        while (br1.readLine() != null) totalLineas++;
+        br1.close();
 
         Protocolo[] resultado = new Protocolo[totalLineas];
         int idx = 0;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(NOMBRE_ARCHIVO))) {
-            String linea;
-            while ((linea = br.readLine()) != null) {
-                String[] partes = linea.split(SEP, -1);
+        // Segunda pasada: reconstruir objetos (IOException se propaga al invocador)
+        BufferedReader br2 = new BufferedReader(new FileReader(NOMBRE_ARCHIVO));
+        String linea;
+        while ((linea = br2.readLine()) != null) {
+            String[] partes = linea.split(SEP, -1);
 
-                if (partes.length < 5) {
-                    System.out.println("AVISO [DESERIALIZAR]: Linea con formato incorrecto, se omite: ["
-                            + linea + "]");
-                    continue;
-                }
-
-                String tipo          = partes[0];
-                String codigo        = partes[1];
-                String registro      = partes[2];
-                String instrucciones = partes[3];
-                String limites       = partes[4];
-
-                if (tipo.equals("INS")) {
-                    resultado[idx] = new ProtocoloInsuficiencia(
-                            codigo, registro, instrucciones, limites, null, null, null);
-                } else if (tipo.equals("RAD")) {
-                    resultado[idx] = new ProtocoloRadiacion(
-                            codigo, registro, instrucciones, limites, null, null, null);
-                } else {
-                    System.out.println("AVISO [DESERIALIZAR]: Tipo desconocido '"
-                            + tipo + "', se omite.");
-                    continue;
-                }
-                idx++;
+            if (partes.length < 5) {
+                System.out.println("AVISO [DESERIALIZAR]: Linea con formato incorrecto, se omite: ["
+                        + linea + "]");
+                continue;
             }
-        } catch (IOException e) {
-            System.out.println("ERROR [DESERIALIZAR]: Fallo durante la lectura. " + e.getMessage());
-            return new Protocolo[0];
+
+            String tipo          = partes[0];
+            String numeroIdStr   = partes[1];
+            String registro      = partes[2];
+            String instrucciones = partes[3];
+            String limites       = partes[4];
+
+            int numero_id;
+            try {
+                numero_id = Integer.parseInt(numeroIdStr);
+            } catch (NumberFormatException e) {
+                System.out.println("AVISO [DESERIALIZAR]: numero_id '" + numeroIdStr
+                        + "' no es entero, se omite la linea.");
+                continue;
+            }
+
+            if (tipo.equals("INS")) {
+                resultado[idx] = new ProtocoloInsuficiencia(
+                        numero_id, registro, instrucciones, limites, null, null, null);
+            } else if (tipo.equals("RAD")) {
+                resultado[idx] = new ProtocoloRadiacion(
+                        numero_id, registro, instrucciones, limites, null, null, null);
+            } else {
+                System.out.println("AVISO [DESERIALIZAR]: Tipo '" + tipo + "' desconocido, se omite.");
+                continue;
+            }
+            idx++;
         }
+        br2.close();
 
         System.out.println("OK [DESERIALIZAR]: " + idx + " protocolo(s) cargados desde '"
                 + NOMBRE_ARCHIVO + "'.");
@@ -369,12 +289,10 @@ public class ImplementacionOperacionCRUD implements OperacionCRUD, OperacionArch
     // =======================================================================
 
     /**
-     * Busca el índice de un protocolo en el arreglo según su código (ID).
-     * Recorre el arreglo de izquierda a derecha y retorna la primera coincidencia.
+     * Busca el índice de un protocolo según su numero_id (como String).
      *
-     * @param codigo Código del protocolo a buscar. No puede ser nulo ni vacío.
-     * @return Índice de la posición del protocolo en el arreglo,
-     *         o {@code -1} si no se encuentra o el código es inválido.
+     * @param codigo numero_id del protocolo a buscar.
+     * @return Índice en el arreglo, o {@code -1} si no se encuentra.
      */
     public int buscarIndicePorCodigo(String codigo) {
         if (codigo == null || codigo.trim().isEmpty()) return -1;
@@ -388,16 +306,16 @@ public class ImplementacionOperacionCRUD implements OperacionCRUD, OperacionArch
     }
 
     /**
-     * Retorna el arreglo completo de protocolos para uso externo (ej: imprimir estado).
+     * Retorna el arreglo completo de protocolos.
      *
      * @return Arreglo actual de {@link Protocolo}.
      */
     public Protocolo[] getArreglo_protocolos() { return arreglo_protocolos; }
 
     /**
-     * Retorna el tamaño actual del arreglo de protocolos.
+     * Retorna el tamaño actual del arreglo.
      *
-     * @return Tamaño del arreglo (incluyendo posiciones vacías).
+     * @return Tamaño del arreglo incluyendo posiciones vacías.
      */
     public int getTamano() { return arreglo_protocolos.length; }
 }
